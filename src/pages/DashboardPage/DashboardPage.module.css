@@ -1,0 +1,24 @@
+/* src/pages/DashboardPage/DashboardPage.module.css */
+.dashboard {
+  display: flex;
+  height: 100vh;
+}
+
+.mainContent {
+  flex-grow: 1;
+  display: flex;
+  background-color: #f5f5f5; /* Светло-серый */
+}
+
+.droneSection {
+  flex: 1; /* Занимает 50% ширины */
+  padding: 20px;
+  background-color: white;
+  border-right: 1px solid #ddd; /* Разделительная линия */
+}
+
+.logSection {
+  flex: 1; /* Занимает 50% ширины */
+  padding: 20px;
+  background-color: white;
+}
