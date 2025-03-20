@@ -11,6 +11,6 @@ export interface Topic {
   
 export interface Log {
     id: string;
-    message: string;
-    timestamp: string;
+    timestamp: bigint;
+    data: Record<string, any>;
 }

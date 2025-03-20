@@ -1,4 +1,6 @@
-export interface IDrone{
+import { TopicSchema } from './ISchema'
+
+export interface Drone{
     id:string;
-    isActivated:boolean;
+    schemas:TopicSchema[];
 }

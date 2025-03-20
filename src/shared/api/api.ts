@@ -1,27 +1,54 @@
 // src/shared/api/api.ts
 import axios from 'axios';
-import { Drone, Log } from './types';
+import { Drone } from './models/IDrone';
+import { TopicStatus } from './models/ITopicStatus';
+import { Log } from '../../features/logs/model/types';
+import { droneStore } from '../stores/droneStore';
 
-const API_URL = 'http://localhost:3000'; // Замените на ваш URL сервера
+const API_URL = 'http://localhost:5000/api'; 
+
+const $api = axios.create({
+  withCredentials: true,
+  baseURL: API_URL,
+})
+$api.interceptors.request.use((config)=>{
+  config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
+  return config;
+})
+export default $api;
+
+const socket = new WebSocket('ws://localhost:8083');
+
+socket.onopen = () => {
+    console.log('open connection')
+}
+
+socket.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    const topicLogs = droneStore.logs.get(data.topic) || [];
+    const log: Log = {
+        id: Date.now().toString(),
+        timestamp: new Date(Number(data.timestamp)).toISOString(),
+        data: data.data,
+    };
+    topicLogs.push(log);
+    droneStore.logs.set(data.topic,topicLogs)
+};
+
 
 // Получить список дронов
 export const fetchDrones = async (): Promise<Drone[]> => {
-  const response = await axios.get(`${API_URL}/drones`);
+  const response = await $api.get(`${API_URL}/drones`, {withCredentials: true});
+  console.log(response)
   return response.data;
 };
 
-// Подписаться на топик
-export const subscribeToTopic = async (droneId: string, topicName: string): Promise<void> => {
-  await axios.post(`${API_URL}/subscribe`, { droneId, topicName });
+// Обновить подписки
+export const updateTopics = async (data: { drone_id: string; topics: TopicStatus[] }): Promise<void> => {
+  await $api.post(`${API_URL}/topics/update`, data);
 };
 
-// Отписаться от топика
-export const unsubscribeFromTopic = async (droneId: string, topicName: string): Promise<void> => {
-  await axios.post(`${API_URL}/unsubscribe`, { droneId, topicName });
-};
-
-// Получить логи для дрона
-export const fetchLogs = async (droneId: string): Promise<Log[]> => {
-  const response = await axios.get(`${API_URL}/logs`, { params: { droneId } });
-  return response.data;
+// Обновить подписки
+export const redirectLogs = async (data: { droneId: string, selectedPath: string }): Promise<void> => {
+  await $api.post(`${API_URL}/log/redirect`, data);
 };
