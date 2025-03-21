@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { droneStore } from '../../shared/stores/droneStore';
 import { DroneList, Sidebar } from '../../widgets';
-import { LogWindow } from '../../features/logs/ui/LogWindow';
 import styles from './DashboardPage.module.css';
+import { LogViewer } from '../../widgets/LogViewer/LogViewer';
+
 
 export const DashboardPage = observer(() => {
   const [leftWidth, setLeftWidth] = useState<number>(50); // Начальная ширина левой секции в процентах
@@ -59,8 +59,7 @@ export const DashboardPage = observer(() => {
           className={styles.logSection}
           style={{ width: `${100 - leftWidth}%` }}
         >
-          <LogWindow />
-  
+          <LogViewer />
         </div>
       </div>
     </div>

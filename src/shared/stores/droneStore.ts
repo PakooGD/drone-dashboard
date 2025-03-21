@@ -1,15 +1,14 @@
 // src/shared/stores/droneStore.ts
 import { makeAutoObservable } from 'mobx';
 import { fetchDrones, updateTopics, redirectLogs } from '../api/api';
-import { Drone } from '../api/models/IDrone';
-import { TopicStatus } from '../api/models/ITopicStatus';
-import { Log, TopicData } from '../../features/logs/model/types';
+import { Drone,Log,TopicStatus } from '../types/ITypes';
+
 
 class DroneStore {
     drones: Drone[] = [];
     selectedDroneId: string | null = null;
     logs: Map<string, Log[]> = new Map();
-
+    socket: WebSocket | null = null
 
     constructor() {
         makeAutoObservable(this);

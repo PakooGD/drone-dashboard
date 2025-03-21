@@ -1,9 +1,7 @@
 // src/shared/api/api.ts
 import axios from 'axios';
-import { Drone } from './models/IDrone';
-import { TopicStatus } from './models/ITopicStatus';
-import { Log } from '../../features/logs/model/types';
-import { droneStore } from '../stores/droneStore';
+import { Drone,TopicStatus } from '../types/ITypes';
+
 
 const API_URL = 'http://localhost:5000/api'; 
 
@@ -17,23 +15,6 @@ $api.interceptors.request.use((config)=>{
 })
 export default $api;
 
-const socket = new WebSocket('ws://localhost:8083');
-
-socket.onopen = () => {
-    console.log('open connection')
-}
-
-socket.onmessage = (event) => {
-    const data = JSON.parse(event.data)
-    const topicLogs = droneStore.logs.get(data.topic) || [];
-    const log: Log = {
-        id: Date.now().toString(),
-        timestamp: new Date(Number(data.timestamp)).toISOString(),
-        data: data.data,
-    };
-    topicLogs.push(log);
-    droneStore.logs.set(data.topic,topicLogs)
-};
 
 
 // Получить список дронов
