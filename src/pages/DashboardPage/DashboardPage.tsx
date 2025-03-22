@@ -6,7 +6,7 @@ import { LogViewer } from '../../widgets/LogViewer/LogViewer';
 
 
 export const DashboardPage = observer(() => {
-  const [leftWidth, setLeftWidth] = useState<number>(50); // Начальная ширина левой секции в процентах
+  const [leftWidth, setLeftWidth] = useState<number>(40); // Начальная ширина левой секции в процентах
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

@@ -1,28 +1,84 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DroneTopicList } from '../../features/droneLog/ui/DroneTopicList';
-import { logStore } from '../../entities/log/model/logStore';
+import { droneStore } from '../../shared/stores/droneStore';
+import { v4 as uuidv4 } from 'uuid';
+import { LogMessage } from '../../shared/types/ITypes';
 
 export const LogViewer: React.FC = observer(() => {
+    const socketRef = useRef<WebSocket | null>(null);
+    const [isConnected, setIsConnected] = useState(false);
+    const [connectionError, setConnectionError] = useState<string | null>(null);
+    
     useEffect(() => {
-        logStore.createConnection();
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+    
+        const connect = () => {
+            const socket = new WebSocket('ws://localhost:8083');
+            socketRef.current = socket;
+    
+            socket.onopen = () => {
+                console.log('WebSocket connection opened');
+                setIsConnected(true);
+                setConnectionError(null);
+                socket.send(JSON.stringify({ type: 'register', id: uuidv4() }));
+                reconnectAttempts = 0; 
+            };
+    
+            socket.onmessage = (event) => {
+                const { source, content } = JSON.parse(event.data);
+                const result: LogMessage = {
+                    droneId: source,
+                    content: JSON.parse(content),
+                };
+                droneStore.addLog(result);
+            };
+    
+            socket.onclose = () => {
+                console.log('WebSocket connection closed');
+                setIsConnected(false);
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    console.log(`Reconnecting... Attempt ${reconnectAttempts}`);
+                    setTimeout(connect, 5000); // Пытаемся переподключиться через 5 секунд
+                } else {
+                    setConnectionError('Failed to reconnect. Please check your internet connection.');
+                }
+            };
+    
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                setIsConnected(false);
+                setConnectionError('WebSocket error. Please try again later.');
+                socket.close(); // Закрываем соединение при ошибке
+            };
+        };
+    
+        connect(); // Первоначальное подключение
+    
         return () => {
-            logStore.closeConnection();
+            if (socketRef.current) {
+                socketRef.current.close();
+                socketRef.current = null;
+            }
         };
     }, []);
 
-    const droneIds: string[] = Array.from(logStore.logs.keys());
-
+    const droneIds: string[] = Array.from(droneStore.logs.keys());
+    
     return (
         <div>
             <h1>Logs</h1>
-
+            {!isConnected && connectionError && (
+                <div style={{ color: 'red' }}>{connectionError}</div>
+            )}
             {droneIds.map((id) => {
-                const topics = logStore.logs.get(id);
+                const topics = droneStore.logs.get(id);
                 return topics ? (
                     <DroneTopicList key={id} droneId={id} topics={topics} />
                 ) : null;
             })}
         </div>
     );
-});
+});      

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { logStore } from '../../../entities/log/model/logStore';
-import styles from './Timeline.module.scss'; // Импортируем SCSS Module
+import { droneStore } from '../../../shared/stores/droneStore'
+import styles from './Timeline.module.scss';
 import { formatValue } from '../../droneLog/lib/formatValue';
 
 interface TimelineProps {
@@ -14,7 +14,7 @@ export const Timeline: React.FC<TimelineProps> = observer(({ droneId, topic }) =
     const [timestamps, setTimestamps] = useState<string[]>([]);
 
     // Получаем все логи для данного топика
-    const topicLogs = logStore.logs.get(droneId)?.get(topic) || [];
+    const topicLogs = droneStore.logs.get(droneId)?.get(topic) || [];
 
     // Обновляем список временных меток при изменении логов
     useEffect(() => {

@@ -23,8 +23,8 @@ export interface TopicSchema {
   
 export interface Log {
     id: string;
-    timestamp: bigint | string;
-    data: Record<string, any>;
+    timestamp: string;
+    data: TopicData;
 }
 
 export interface TopicData {
@@ -38,3 +38,9 @@ export interface TopicStatus {
     schemaName: string;
     status: boolean;
 }
+
+export interface LogMessage {
+    droneId: string;
+    content: TopicData;
+}
+

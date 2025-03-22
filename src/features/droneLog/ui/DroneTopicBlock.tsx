@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Dropdown } from '../../../shared/ui/Dropdown/Dropdown';
 import { Timeline } from '../../timeline/ui/Timeline';
 import { formatValue } from '../lib/formatValue';
-import { Log } from '../../../entities/log/model/types';
+import { Log } from '../../../shared/types/ITypes';
 import { LineChartComponent } from '../../../shared/ui/LineChartComponent/LineChartComponent';
 import { collectValues } from '../lib/collectValues';
 import Slider from 'rc-slider';
