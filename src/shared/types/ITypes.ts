@@ -44,3 +44,7 @@ export interface LogMessage {
     content: TopicData;
 }
 
+export interface ULogData {
+    source: string;
+    content: Record<string, TopicData[]>;
+}

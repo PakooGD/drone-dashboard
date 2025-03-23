@@ -1,15 +1,27 @@
 // src/shared/stores/droneStore.ts
 import { makeAutoObservable, observable } from 'mobx';
-import { fetchDrones, updateTopics, redirectLogs } from '../api/api';
-import { Drone,Log,TopicStatus, LogMessage } from '../types/ITypes';
+import { fetchDrones, updateTopics, redirectLogs, loadLogs } from '../api/api';
+import { Drone,Log,TopicStatus, LogMessage, ULogData, TopicData } from '../types/ITypes';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import path from 'path';
+import { Filelike, MessageType, ULog } from "@foxglove/ulog";
+import { FileReader } from "@foxglove/ulog/node";
 
+function formatString(input: string) {
+    return input
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
+}
 
 class DroneStore {
     drones: Drone[] = [];
     selectedDroneId: string | null = null;
     socket: WebSocket | null = null
     logs = observable.map<string, Map<string, Log[]>>(); // droneId -> topic -> logs
+    // ulog: any[] = [];
+    ulog: Map<string, ULogData> = new Map();
 
     constructor() {
         makeAutoObservable(this);
@@ -19,7 +31,6 @@ class DroneStore {
     async loadDrones() {
         try {
             this.drones = await fetchDrones();
-            console.log(this.drones);
         } catch (error) {
             console.error('Failed to load drones:', error);
         }
@@ -42,6 +53,50 @@ class DroneStore {
             console.log('LogDirection updated successfully for drone:', droneId);
         } catch (error) {
             console.error('LogDirection to update subscriptions:', error);
+            throw error;
+        }
+    }
+
+    async loadLogs(droneId: string) {
+        try {
+            const {filelike, filename} = await loadLogs({ droneId });
+
+            // Чтение и обработка файла
+            const ulog = new ULog(filelike);
+            await ulog.open();
+            
+            const topics = new Map<string, any[]>();
+            
+            for await (const msg of ulog.readMessages()) {
+                if (msg.type === MessageType.Data) {
+                    const dataTopic = String(ulog.subscriptions.get(msg.msgId)?.name);
+                    const name = formatString(dataTopic);
+
+                    const message: TopicData = {
+                        name: name,
+                        topic: dataTopic,
+                        timestamp: BigInt(msg.value.timestamp),
+                        data: msg.value,
+                    };
+
+                    // Если топик еще не существует в Map, создаем для него пустой массив
+                    if (!topics.has(dataTopic)) {
+                        topics.set(dataTopic, []);
+                    }
+
+                    // Добавляем сообщение в массив для соответствующего топика
+                    topics.get(dataTopic)!.push(message);
+                }
+            }
+  
+            const result = {
+                source: filename,
+                content: Object.fromEntries(topics),
+            };
+            
+            this.ulog.set(droneId,result)
+
+        } catch (error) {
             throw error;
         }
     }

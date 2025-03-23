@@ -35,6 +35,15 @@ export const DroneList = observer(() => {
     }
   };
 
+  const handleLoadUlog = async (droneId: string) => {
+    try {
+      await droneStore.loadLogs(droneId);
+    } catch (error) {
+      console.error('Ошибка при загрузке логов:', error);
+    }
+  };
+
+
   const handleRedirectPathChange = (droneId: string, path: string) => {
     setRedirectPaths((prev) => ({
       ...prev,
@@ -77,15 +86,14 @@ export const DroneList = observer(() => {
             </div>
           )}
           <div className={styles.droneMenu}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleUpdateSubscriptions(drone.id);
-            }}
-            className={styles.updateButton}
-          >
-            Изменить параметры
-          </button>
+            <div className={styles.menuSection}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateSubscriptions(drone.id);
+                }}
+                className={styles.updateButton}
+              > Изменить параметры </button>
               <div className={styles.redirectSection}>
                 <select
                   value={redirectPaths[drone.id] || 'site'} 
@@ -96,7 +104,15 @@ export const DroneList = observer(() => {
                   <option value="foxglove">Foxglove</option> 
                 </select>
               </div>
-              </div>
+            </div> 
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLoadUlog(drone.id);
+              }}
+              className={styles.updateButton}
+            > Загрузить ULOG </button>
+          </div>
         </div>
       ))}
     </div>

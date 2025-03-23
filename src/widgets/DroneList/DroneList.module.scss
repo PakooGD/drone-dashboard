@@ -69,13 +69,17 @@
   color: #666; // Светлый цвет
 }
 
-
+.menuSection {
+  display:flex;
+  gap: 10px;
+  justify-content: space-between;
+}
 
 .droneMenu {
   display:flex;
   margin-top: 10px;
   gap: 10px;
-  justify-content: left;
+  justify-content: space-between;
 }
 
 .redirectSection {

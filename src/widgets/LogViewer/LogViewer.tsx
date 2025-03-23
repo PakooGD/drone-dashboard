@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DroneTopicList } from '../../features/droneLog/ui/DroneTopicList';
+import { DroneTopicList} from '../../features/droneLog/ui/DroneTopicList';
 import { droneStore } from '../../shared/stores/droneStore';
 import { v4 as uuidv4 } from 'uuid';
-import { LogMessage } from '../../shared/types/ITypes';
+import { Drone, LogMessage } from '../../shared/types/ITypes';
 
 export const LogViewer: React.FC = observer(() => {
     const socketRef = useRef<WebSocket | null>(null);
@@ -65,7 +65,7 @@ export const LogViewer: React.FC = observer(() => {
         };
     }, []);
 
-    const droneIds: string[] = Array.from(droneStore.logs.keys());
+    const droneIds: Drone[] = droneStore.drones;
     
     return (
         <div>
@@ -73,11 +73,20 @@ export const LogViewer: React.FC = observer(() => {
             {!isConnected && connectionError && (
                 <div style={{ color: 'red' }}>{connectionError}</div>
             )}
-            {droneIds.map((id) => {
-                const topics = droneStore.logs.get(id);
-                return topics ? (
-                    <DroneTopicList key={id} droneId={id} topics={topics} />
-                ) : null;
+            {droneIds.map((drone) => {
+                const ulog = droneStore.ulog.get(drone.id)
+                const topics = droneStore.logs.get(drone.id);
+                if (topics || ulog) {
+                    return (
+                        <DroneTopicList
+                            key={`${drone.id}_topics`} 
+                            droneId={drone.id}
+                            topics={topics}
+                            ulog={ulog}
+                        />
+                    );
+                }
+                return null;
             })}
         </div>
     );
