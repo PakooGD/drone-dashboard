@@ -19,6 +19,7 @@
 .droneHeader {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   cursor: pointer;
   padding: 10px;
   background-color: #f9f9f9;
@@ -28,6 +29,39 @@
 
   &:hover {
     background-color: #f1f1f1;
+  }
+}
+
+.droneTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.droneId {
+  font-weight: 600;
+}
+
+.droneIp {
+  font-weight: 500;
+  color: #666;
+}
+
+.statusIndicator {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+  
+  &.online {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  &.offline {
+    background-color: #f8d7da;
+    color: #721c24;
   }
 }
 
@@ -57,7 +91,6 @@
 }
 
 .topicName {
-
   font-weight: 600; // Более насыщенный шрифт
   color: #333; // Темный цвет
 }

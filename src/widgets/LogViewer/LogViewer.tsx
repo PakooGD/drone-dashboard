@@ -6,14 +6,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { Drone, LogMessage } from '../../shared/types/ITypes';
 
 export const LogViewer: React.FC = observer(() => {
+    
     const socketRef = useRef<WebSocket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
-    
+    const reactId = uuidv4();
+
     useEffect(() => {
         let reconnectAttempts = 0;
         const maxReconnectAttempts = 5;
-    
         const connect = () => {
             const socket = new WebSocket('ws://localhost:8083');
             socketRef.current = socket;
@@ -22,7 +23,7 @@ export const LogViewer: React.FC = observer(() => {
                 console.log('WebSocket connection opened');
                 setIsConnected(true);
                 setConnectionError(null);
-                socket.send(JSON.stringify({ type: 'register', id: uuidv4() }));
+                socket.send(JSON.stringify({ type: 'register', id: reactId }));
                 reconnectAttempts = 0; 
             };
     
@@ -30,8 +31,9 @@ export const LogViewer: React.FC = observer(() => {
                 const { source, content } = JSON.parse(event.data);
                 const result: LogMessage = {
                     droneId: source,
-                    content: JSON.parse(content),
+                    content: content,
                 };
+                console.log()
                 droneStore.addLog(result);
             };
     

@@ -1,12 +1,9 @@
 // src/shared/stores/droneStore.ts
 import { makeAutoObservable, observable } from 'mobx';
 import { fetchDrones, updateTopics, redirectLogs, loadLogs } from '../api/api';
-import { Drone,Log,TopicStatus, LogMessage, ULogData, TopicData } from '../types/ITypes';
+import { DroneData,Log,TopicStatus, LogMessage, ULogData, TopicData, TopicSchema } from '../types/ITypes';
 import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs';
-import path from 'path';
-import { Filelike, MessageType, ULog } from "@foxglove/ulog";
-import { FileReader } from "@foxglove/ulog/node";
+import { MessageType, ULog } from "@foxglove/ulog";
 
 function formatString(input: string) {
     return input
@@ -16,7 +13,7 @@ function formatString(input: string) {
 }
 
 class DroneStore {
-    drones: Drone[] = [];
+    drones: DroneData[] = [];
     selectedDroneId: string | null = null;
     socket: WebSocket | null = null
     logs = observable.map<string, Map<string, Log[]>>(); // droneId -> topic -> logs
@@ -30,7 +27,13 @@ class DroneStore {
 
     async loadDrones() {
         try {
-            this.drones = await fetchDrones();
+            const result = await fetchDrones();
+            this.drones = result.map(drone => ({
+                id: drone.id,
+                topics: drone.topics,
+                status: drone.status,
+                ip_address: drone.ip_address,
+            }));
         } catch (error) {
             console.error('Failed to load drones:', error);
         }

@@ -4,9 +4,16 @@ export interface AuthResponse {
     drone: Drone;
 }
 
+export interface DroneData {
+    id: string;
+    topics: TopicSchema[];
+    status: 'online' | 'offline';
+    ip_address: string;
+}
+
 export interface Drone{
     id:string;
-    schemas:TopicSchema[];
+    topics:TopicSchema[];
 }
   
 export interface Topic {
@@ -15,10 +22,15 @@ export interface Topic {
 }
 
 export interface TopicSchema {
+    name: string,
     topic: string,
-    encoding: string,
-    schemaName: string,
-    schema: any,
+    status: boolean
+}
+
+export interface TopicStatus {
+    name: string;
+    topic: string;
+    status: boolean;
 }
   
 export interface Log {
@@ -34,10 +46,7 @@ export interface TopicData {
     data: Record<string, any>;
 }
 
-export interface TopicStatus {
-    schemaName: string;
-    status: boolean;
-}
+
 
 export interface LogMessage {
     droneId: string;
